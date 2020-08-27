@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json 
 
-
 df1 = pd.concat(pd.read_excel('indicadoressegurancapublicamunicmar20.xlsx', sheet_name=None), ignore_index=True)
 df2 = pd.read_excel('indicadoressegurancapublicaufmar20_ocorrencias.xlsx')
 df3 = pd.read_excel('indicadoressegurancapublicaufmar20_vítimas.xlsx')
@@ -13,15 +12,12 @@ df3 = pd.read_excel('indicadoressegurancapublicaufmar20_vítimas.xlsx')
 df1['Mês/Ano'] = pd.to_datetime(df1['Mês/Ano'], errors='coerce', format='%Y-%m-%d %H:%M:%S')
 df1["Ano"] = df1["Mês/Ano"].dt.year
 
-
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
 @app.route('/hello', methods=['GET'])
 def hello():
   return 'Hello World!'
-
-
 
 ################################################################
 # GET ocorrências totais por UF
@@ -136,18 +132,13 @@ def getOcorrTipoCrimeByAno(crime, ano):
   return jsonify(int(res))
 ################################################################
 
-
-
-
 if __name__ == '__main__':
   app.run()
 
 # Possíveis rotas:
-# @app.route('/api/ocorr/total/<UF:name>', methods=['GET']) OK
-# @app.route('/api/vit/total/<UF:name>', methods=['GET'])
-# @app.route('/api/vit/<Município:name>', methods=['GET'])
-# @app.route('/api/ocorr/<Tipo Crime:name>', methods=['GET'])
-# @app.route('/api/vit/br/<Tipo Crime:name>', methods=['GET'])
-# @app.route('/api/vit/epoc/<Ano:name>', methods=['GET'])
-# @app.route('/api/ocorr/crim/tipos', methods=['GET'])
-# @app.route('/api/vit/crim/tipos', methods=['GET'])
+# @app.route('/max/munc/vit', methods=['GET'])
+# @app.route('/min/munc/vit', methods=['GET'])
+# @app.route('/max/estad/vit', methods=['GET'])
+# @app.route('/min/estad/vit', methods=['GET'])
+# @app.route('/max/estad/ocorr', methods=['GET'])
+# @app.route('/min/estad/ocorr', methods=['GET'])
