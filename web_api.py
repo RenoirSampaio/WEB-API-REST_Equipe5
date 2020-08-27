@@ -10,6 +10,9 @@ df1 = pd.concat(pd.read_excel('indicadoressegurancapublicamunicmar20.xlsx', shee
 df2 = pd.read_excel('indicadoressegurancapublicaufmar20_ocorrencias.xlsx')
 df3 = pd.read_excel('indicadoressegurancapublicaufmar20_vítimas.xlsx')
 
+df1['Mês/Ano'] = pd.to_datetime(df1['Mês/Ano'], errors='coerce', format='%Y-%m-%d %H:%M:%S')
+df1["Ano"] = df1["Mês/Ano"].dt.year
+
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -20,29 +23,118 @@ def hello():
 
 
 
+################################################################
 # GET ocorrências totais por UF
 # /api/ocorr/total/<UF:name>
 # Aqui ta retornando uma Series
 # Um tipo de dado do pandas
 @app.route('/ocorr/total/<UF>', methods=['GET'])
 def getOcorrTotalByUf(UF):
-  # if 'UF' in request.args:
-  #     UF = request.args['UF']
-  # else:
-  #     return "Error: Especifique o UF da consulta"
   df2_prov = df2.loc[df2['UF'] == UF]
   res = df2_prov.groupby("UF")["Ocorrências"].sum().to_json()
   return res
+################################################################
 
+# GET vítimas totais por UF
+# vit/total/<UF:name>
+@app.route('/vit/total/<UF>', methods=['GET'])
+def getVitTotal(UF):
+  df3_prov = df3.loc[df3['UF'] == UF]
+  res = df3_prov.groupby("UF")["Vítimas"].sum().to_json()
+  return res
+################################################################
 
+# GET vítimas por Municípios
+# /vit/<city>
+@app.route('/vit/<city>', methods=['GET'])
+def getVitCity(city):
+  df1_prov = df1.loc[df1['Município'] == city]
+  res = df1_prov.groupby("Município")["Vítimas"].sum().to_json()
+  return res
+################################################################
 
-# # /api/ocorr/crim/tipos
+# GET ocorrências de um tipo de crime no Brasil
+# /ocorr/<crime>
+@app.route('/ocorr/<crime>', methods=['GET'])
+def getOcorrCrimeBrasil(crime):
+  df2_prov = df2.loc[df2['Tipo Crime'] == crime]
+  res = df2_prov["Ocorrências"].sum()
+  return jsonify(int(res))
+################################################################
+
+# GET vítimas de um tipo de crime no Brasil
+# /vit/br/<crime>
+@app.route('/vit/br/<crime>', methods=['GET'])
+def getVitBrasil(crime):
+  df3_prov = df3.loc[df3['Tipo Crime'] == crime]
+  res = df3_prov["Vítimas"].sum()
+  return jsonify(int(res))
+################################################################
+
+# GET vítimas por Ano
+# # /vit/epoc/<ano>
+@app.route('/vit/epoc/<ano>', methods=['GET'])
+def getVitByAno(ano):
+  df1_prov = df1.loc[df1['Ano'] == int(ano)]
+  res = df1_prov["Vítimas"].sum()
+  return jsonify(int(res))
+################################################################
+# GET tipos de crime das ocorrencias
+# /api/ocorr/crim/tipos
 # Aqui ta retornando um array de strings.
 @app.route('/ocorr/crim/tipos', methods=['GET'])
 def getTiposCrimes():
   res = np.unique(df2['Tipo Crime'])
   a = res.tolist()
   return json.dumps(a)
+################################################################
+
+# GET tipos de crime onde há vitimas
+# /vit/crim/tipos
+@app.route('/vit/crim/tipos', methods=['GET'])
+def getTiposCrimes2():
+  return json.dumps(np.unique(df3['Tipo Crime']).tolist())
+################################################################
+
+# GET ocorrências de um tipo de crime em um estado
+# /ocorr/<crime>/<UF>
+@app.route('/ocorr/<crime>/<UF>', methods=['GET'])
+def getOcorrTipoCrimeEstado(crime, UF):
+  df2_prov = df2.loc[df2['Tipo Crime'] == crime]
+  df2_prov = df2_prov.loc[df2_prov['UF'] == UF]
+  res = df2_prov["Ocorrências"].sum()
+  return jsonify(int(res))
+################################################################
+
+# GET vítimas de um tipo de crime em um estado 
+# /vit/<crime>/<UF>
+@app.route('/vit/<crime>/<UF>', methods=['GET'])
+def getVitTipoCrimeEstado(crime, UF):
+  df3_prov = df3.loc[df3['Tipo Crime'] == crime]
+  df3_prov = df3_prov.loc[df3_prov['UF'] == UF]
+  res = df3_prov["Vítimas"].sum()
+  return jsonify(int(res))
+################################################################
+
+# GET vítimas de um tipo de crime por ano 
+# /vit/crim/epoc/<crime>/<ano>
+@app.route('/vit/crim/epoc/<crime>/<ano>', methods=['GET'])
+def getVitTipoCrimeByAno(crime, ano):
+  df3_prov = df3.loc[df3['Tipo Crime'] == crime]
+  df3_prov = df3_prov.loc[df3_prov['Ano'] == int(ano)]
+  res = df3_prov["Vítimas"].sum()
+  return jsonify(int(res))
+################################################################
+
+# GET ocorrências de um tipo de crime por ano
+# /ocorr/crim/epoc/<crime>/<ano>
+@app.route('/ocorr/crim/epoc/<crime>/<ano>', methods=['GET'])
+def getOcorrTipoCrimeByAno(crime, ano):
+  df2_prov = df2.loc[df2['Tipo Crime'] == crime]
+  df2_prov = df2_prov.loc[df2_prov['Ano'] == int(ano)]
+  res = df2_prov["Ocorrências"].sum()
+  return jsonify(int(res))
+################################################################
 
 
 
@@ -51,7 +143,7 @@ if __name__ == '__main__':
   app.run()
 
 # Possíveis rotas:
-# @app.route('/api/ocorr/total/<UF:name>', methods=['GET'])
+# @app.route('/api/ocorr/total/<UF:name>', methods=['GET']) OK
 # @app.route('/api/vit/total/<UF:name>', methods=['GET'])
 # @app.route('/api/vit/<Município:name>', methods=['GET'])
 # @app.route('/api/ocorr/<Tipo Crime:name>', methods=['GET'])
