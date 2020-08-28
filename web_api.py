@@ -15,9 +15,13 @@ df1["Ano"] = df1["Mês/Ano"].dt.year
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
-@app.route('/hello', methods=['GET'])
+@app.route('/')
+def home():
+  return 'Bem vindo a WEB API, faça sua consulta!'
+
+@app.route('/hello')
 def hello():
-  return 'Hello World!'
+  return 'Tudo bem?! =D'
 
 ################################################################
 # GET ocorrências totais por UF
