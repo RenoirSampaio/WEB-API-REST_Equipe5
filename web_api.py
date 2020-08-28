@@ -22,8 +22,6 @@ def hello():
 ################################################################
 # GET ocorrências totais por UF
 # /api/ocorr/total/<UF:name>
-# Aqui ta retornando uma Series
-# Um tipo de dado do pandas
 @app.route('/ocorr/total/<UF>', methods=['GET'])
 def getOcorrTotalByUf(UF):
   df2_prov = df2.loc[df2['UF'] == UF]
@@ -75,9 +73,9 @@ def getVitByAno(ano):
   res = df1_prov["Vítimas"].sum()
   return jsonify(int(res))
 ################################################################
+
 # GET tipos de crime das ocorrencias
 # /api/ocorr/crim/tipos
-# Aqui ta retornando um array de strings.
 @app.route('/ocorr/crim/tipos', methods=['GET'])
 def getTiposCrimes():
   res = np.unique(df2['Tipo Crime'])
@@ -132,53 +130,59 @@ def getOcorrTipoCrimeByAno(crime, ano):
   return jsonify(int(res))
 ################################################################
 
-# /max/munc/vit
 # GET top 10 municípios com mais vítimas
+# /max/munc/vit
 @app.route('/max/munc/vit', methods=['GET'])
 def getTop10VitByCity():
   df1_prov = df1.groupby("Município")["Vítimas"].sum()
   res = df1_prov.nlargest(10).to_json()
   return res
+################################################################
 
 # GET top 10 municípios com menos vítimas
+# /min/munc/vit
 @app.route('/min/munc/vit', methods=['GET'])
 def getTop10MinVitByCity():
   df1_prov = df1.groupby("Município")["Vítimas"].sum()
   res = df1_prov.nsmallest(10).to_json()
   return res
+################################################################
 
 # GET top 10 estados com mais vítimas
+# /max/estad/vit
 @app.route('/max/estad/vit', methods=['GET'])
 def getMaxEstadVit():
   df1_prov = df1.groupby("Sigla UF")["Vítimas"].sum()
   res = df1_prov.nlargest(10).to_json()
   return res
+################################################################
 
 # GET top 10 estados com menos vítimas
+# /min/estad/vit
 @app.route('/min/estad/vit', methods=['GET'])
 def getTop10EstadosMinVit():
   df1_prov = df1.groupby("Sigla UF")["Vítimas"].sum()
   res = df1_prov.nsmallest(10).to_json()
   return res
+################################################################
 
-
-# GET top 10 estados com mais ocorrências 
+# GET top 10 estados com mais ocorrências
+# /max/estad/ocorr
 @app.route('/max/estad/ocorr', methods=['GET'])
 def getTop10EstadosMaisOcorr():
   df2_prov = df2.groupby("UF")["Ocorrências"].sum()
   res = df2_prov.nlargest(10).to_json()
   return res
+################################################################
 
 # GET top 10 estados com menos ocorrências
+# /min/estad/ocorr
 @app.route('/min/estad/ocorr', methods=['GET'])
 def getTop10EstadosMenosOcorr():
   df2_prov = df2.groupby("UF")["Ocorrências"].sum()
   res = df2_prov.nsmallest(10).to_json()
   return res
-
-
+################################################################
 
 if __name__ == '__main__':
   app.run()
-
-# Possíveis rotas:
